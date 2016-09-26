@@ -4,7 +4,7 @@
     methodOverride = require("method-override"),
     mongoose = require('mongoose');
 
-// Connection to DB MONGODB temp
+// Connection to DB
 mongoose.connect('mongodb://localhost/channels', function (err, res) {
     if (err) throw err;
     console.log('Connected to Database');
