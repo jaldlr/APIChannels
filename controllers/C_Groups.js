@@ -1,4 +1,4 @@
-//File: controllers/tvshows.js
+//Required Files
 var mongoose = require('mongoose');
 var M_GROUP = mongoose.model('CHN_Group');
 var M_USER = mongoose.model('CHN_User');
@@ -98,7 +98,7 @@ exports.addGroup = function (req, res) {
         group: null
     };
 
-    var tgroup = new M_GROUP({
+    var t_group= new M_GROUP({
         name: req.body.name
         , subname: req.body.subname
         , image: req.body.image
@@ -112,10 +112,10 @@ exports.addGroup = function (req, res) {
         , vip_code: req.body.vip_code
     });
 
-    result = tgroup.ValidateModel();
+    result = t_group.ValidateModel();
 
     if (result.is_success) {
-        M_GROUP.find({ name: tgroup.name, subname: tgroup.subname }, function (err, groups) {
+        M_GROUP.find({ name: t_group.name, subname: t_group.subname }, function (err, groups) {
             if (err) {
                 result.status_code = Messages.Generals.ServerError.status_code;
                 result.error_code = Messages.Generals.ServerError.error_code;
@@ -129,7 +129,7 @@ exports.addGroup = function (req, res) {
                 result.is_success = Messages.Groups.AlreadyExist.is_success;
                 res.status(200).jsonp(result);
             } else {
-                tgroup.save(function (err, group) {
+                t_group.save(function (err, group) {
                     if (err) {
                         result.status_code = Messages.Generals.ServerError.status_code;
                         result.error_code = Messages.Generals.ServerError.error_code;
@@ -162,7 +162,7 @@ exports.updateGroup = function (req, res) {
 
     if (req.body.fb_token !== undefined && req.body.fb_token != null && req.body.fb_token != '') {
 
-        //Validamos que el usuario que el usuario que se está tratando de salir del grupo exista
+        //Validamos que el usuario que se está tratando de salir del grupo exista
         M_USER.find({ fb_token: req.body.fb_token }, function (err, users) {
 
             if (err) {

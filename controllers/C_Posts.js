@@ -20,7 +20,7 @@ exports.addPost = function (req, res) {
         privateChannel: null
     };
 
-    var tpost = new M_POST({
+    var t_post = new M_POST({
         channel_id: req.body.channel_id
         , lat: req.body.lat
         , lon: req.body.lon
@@ -48,14 +48,14 @@ exports.addPost = function (req, res) {
             } else {
 
                 var user_creator = users[0];
-                tpost.user_creator = user_creator._id;
+                t_post.user_creator = user_creator._id;
 
-                result = tpost.ValidateModel();
+                result = t_post.ValidateModel();
                 
                 if (result.is_success) {
 
                     //Validamos que el canal exista
-                    M_CHANNEL.findById(tpost.channel_id, function (err, channel) {
+                    M_CHANNEL.findById(t_post.channel_id, function (err, channel) {
 
                         if (err) {
                             result.status_code = Messages.Generals.ServerError.status_code;
@@ -75,14 +75,14 @@ exports.addPost = function (req, res) {
                             if (!channel.is_public) {
 
                                 //Validar que el usuario este en el canal
-                                M_USERPRIVATECHANNEL.find({}, function (err, pchannels) {
+                                M_USERPRIVATECHANNEL.find({}, function (err, p_channels) {
                                     if (err) {
                                         result.status_code = Messages.Generals.ServerError.status_code;
                                         result.error_code = Messages.Generals.ServerError.error_code;
                                         result.message = err.message;
                                         result.is_success = Messages.Generals.ServerError.is_success;
                                         res.status(200).jsonp(result);
-                                    } else if (pchannels.length == 0) {
+                                    } else if (p_channels.length == 0) {
                                         result.status_code = Messages.UserPrivateChannels.UserDoesNotExist.status_code;
                                         result.error_code = Messages.UserPrivateChannels.UserDoesNotExist.error_code;
                                         result.message = Messages.UserPrivateChannels.UserDoesNotExist.message;
@@ -90,9 +90,9 @@ exports.addPost = function (req, res) {
                                         res.status(200).jsonp(result);
                                     } else {
 
-                                        var pchannel = pchannels[0];
+                                        var p_channel = p_channels[0];
                                         //Validamos que exista el grupo
-                                        M_GROUP.findById(pchannel.group_id, function (err, grupo) {
+                                        M_GROUP.findById(p_channel.group_id, function (err, grupo) {
                                             if (err) {
                                                 result.status_code = Messages.Generals.ServerError.status_code;
                                                 result.error_code = Messages.Generals.ServerError.error_code;
@@ -108,7 +108,7 @@ exports.addPost = function (req, res) {
                                             } else {
 
                                                 //Validamos que el usuario tenga validada su cuenta
-                                                M_USERGROUP.find({ user_id: tpost.user_creator, is_validated: true, group_id: grupo ._id}, function (err, items) {
+                                                M_USERGROUP.find({ user_id: t_post.user_creator, is_validated: true, group_id: grupo ._id}, function (err, items) {
                                                     if (err) {
                                                         result.status_code = Messages.Generals.ServerError.status_code;
                                                         result.error_code = Messages.Generals.ServerError.error_code;
@@ -131,7 +131,7 @@ exports.addPost = function (req, res) {
                                                             result.is_success = Messages.UserPrivateChannels.UnAssignedChannel.is_success;
                                                             res.status(200).jsonp(result);
                                                         } else {
-                                                            tpost.save(function (err, post) {
+                                                            t_post.save(function (err, post) {
                                                                 if (err) {
                                                                     result.status_code = Messages.Generals.ServerError.status_code;
                                                                     result.error_code = Messages.Generals.ServerError.error_code;
@@ -152,7 +152,7 @@ exports.addPost = function (req, res) {
                                 });
 
                             } else {
-                                tpost.save(function (err, post) {
+                                t_post.save(function (err, post) {
                                     if (err) {
                                         result.status_code = Messages.Generals.ServerError.status_code;
                                         result.error_code = Messages.Generals.ServerError.error_code;

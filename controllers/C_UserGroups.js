@@ -15,7 +15,7 @@ exports.findAllUserGroups = function (req, res) {
         error_code: Messages.Generals.Success.error_code,
         message: Messages.Generals.Success.message,
         is_success: Messages.Generals.Success.is_success,
-        userGroups: null
+        user_groups: null
     };
 
     if (req.body.fb_token !== undefined && req.body.fb_token != null && req.body.fb_token != '') {
@@ -48,7 +48,7 @@ exports.findAllUserGroups = function (req, res) {
                             result.is_success = Messages.Generals.ServerError.is_success;
                             res.status(200).jsonp(result);
                         } else{
-                            result.userGroups = list;
+                            result.user_groups = list;
                             res.status(200).jsonp(result);
                         }
                     });
@@ -72,17 +72,17 @@ exports.addUserToPrivateGroup = function (req, res) {
         error_code: Messages.Generals.Success.error_code,
         message: Messages.Generals.Success.message,
         is_success: Messages.Generals.Success.is_success,
-        userGroup: null
+        user_group: null
     };
 
-    var tUserGroup = new M_USERGROUP({
+    var t_userGroup = new M_USERGROUP({
         user_id: req.body.user_id
         , group_id: req.body.group_id
         , is_validated: false
     });
 
-    var vipCode = (req.body.vip_code === undefined) ? '' : (req.body.vip_code == null) ? '' : req.body.vip_code;
-    var emailDomail = (req.body.email_domain === undefined) ? '' : (req.body.email_domain == null) ? '' : req.body.email_domain;
+    var vip_code = (req.body.vip_code === undefined) ? '' : (req.body.vip_code == null) ? '' : req.body.vip_code;
+    var email_domain = (req.body.email_domain === undefined) ? '' : (req.body.email_domain == null) ? '' : req.body.email_domain;
 
     if (req.body.fb_token !== undefined && req.body.fb_token != null && req.body.fb_token != '') {
 
@@ -104,15 +104,15 @@ exports.addUserToPrivateGroup = function (req, res) {
             } else {
 
                 var host_user = users[0];
-                tUserGroup.host_user_id = host_user._id;
-                result = tUserGroup.ValidateModel(vipCode, req.body.host_lat, req.body.host_lon);
+                t_userGroup.host_user_id = host_user._id;
+                result = t_userGroup.ValidateModel(vip_code, req.body.host_lat, req.body.host_lon);
                 
                 if (result.is_success) {
 
-                    if (vipCode == '') {//No tiene un código VIP y por lo tanto implican más validaciones
+                    if (vip_code == '') {//No tiene un código VIP y por lo tanto implican más validaciones
 
                         //Validamos que el amigo exista en el sistema
-                        M_USER.findById(tUserGroup.user_id, function (err, friendUser) {
+                        M_USER.findById(t_userGroup.user_id, function (err, friend_user) {
 
                             if (err) {
                                 result.status_code = Messages.Generals.ServerError.status_code;
@@ -120,7 +120,7 @@ exports.addUserToPrivateGroup = function (req, res) {
                                 result.message = err.message;
                                 result.is_success = Messages.Generals.ServerError.is_success;
                                 res.status(200).jsonp(result);
-                            } else if (friendUser == null) {
+                            } else if (friend_user == null) {
                                 result.status_code = Messages.UserPrivateChannels.FriendUserDoesNotExist.status_code;
                                 result.error_code = Messages.UserPrivateChannels.FriendUserDoesNotExist.error_code;
                                 result.message = Messages.UserPrivateChannels.FriendUserDoesNotExist.message;
@@ -129,7 +129,7 @@ exports.addUserToPrivateGroup = function (req, res) {
                             } else {
 
                                 //Validamos que el grupo exista
-                                M_GROUP.findById(tUserGroup.group_id, function (err, group) {
+                                M_GROUP.findById(t_userGroup.group_id, function (err, group) {
                                     if (err) {
                                         result.status_code = Messages.Generals.ServerError.status_code;
                                         result.error_code = Messages.Generals.ServerError.error_code;
@@ -145,14 +145,14 @@ exports.addUserToPrivateGroup = function (req, res) {
                                     } else {
 
                                         //Validamos que el usuario que trata de agregar al amigo exista en el grupo
-                                        M_USERGROUP.find({ user_id: tUserGroup.host_user_id, group_id: tUserGroup.group_id, is_validated: true }, function (err, hostUserExist) {
+                                        M_USERGROUP.find({ user_id: t_userGroup.host_user_id, group_id: t_userGroup.group_id, is_validated: true }, function (err, host_users) {
                                             if (err) {
                                                 result.status_code = Messages.Generals.ServerError.status_code;
                                                 result.error_code = Messages.Generals.ServerError.error_code;
                                                 result.message = err.message;
                                                 result.is_success = Messages.Generals.ServerError.is_success;
                                                 res.status(200).jsonp(result);
-                                            } else if (hostUserExist.length == 0) {
+                                            } else if (host_users.length == 0) {
                                                 result.status_code = Messages.UserGroups.AccessDenied.status_code;
                                                 result.error_code = Messages.UserGroups.AccessDenied.error_code;
                                                 result.message = Messages.UserGroups.AccessDenied.message;
@@ -161,14 +161,14 @@ exports.addUserToPrivateGroup = function (req, res) {
                                             } else {
 
                                                 //validamos que no exista el amigo ya en el grupo, para evitar que se agregue 2 veces
-                                                M_USERGROUP.find({ user_id: friendUser._id, group_id: tUserGroup.group_id }, function (err, duplicatedFriends) {
+                                                M_USERGROUP.find({ user_id: friend_user._id, group_id: t_userGroup.group_id }, function (err, duplicated_friends) {
                                                     if (err) {
                                                         result.status_code = Messages.Generals.ServerError.status_code;
                                                         result.error_code = Messages.Generals.ServerError.error_code;
                                                         result.message = err.message;
                                                         result.is_success = Messages.Generals.ServerError.is_success;
                                                         res.status(200).jsonp(result);
-                                                    } else if (duplicatedFriends.length > 0) {
+                                                    } else if (duplicated_friends.length > 0) {
                                                         result.status_code = Messages.UserGroups.AlreadyExist.status_code;
                                                         result.error_code = Messages.UserGroups.AlreadyExist.error_code;
                                                         result.message = Messages.UserGroups.AlreadyExist.message;
@@ -177,19 +177,19 @@ exports.addUserToPrivateGroup = function (req, res) {
                                                     } else {
 
                                                         //Validamos que el usuario este cerca del que se desea agregar este cerca del host
-                                                        if (Utilities.CalcDistance(req.body.host_lat, req.body.host_lon, parseFloat(friendUser.location_lat), parseFloat(friendUser.location_lon)) <= 0.300) {
+                                                        if (Utilities.CalcDistance(req.body.host_lat, req.body.host_lon, parseFloat(friend_user.location_lat), parseFloat(friend_user.location_lon)) <= 0.300) {
                                                             
                                                             //Validamos si el grupo solicita dominio de correo
                                                             if (group.email_domain != null && group.email_domain != '') {
 
                                                                 //Validamos si el email_domain fue agregado en el request
-                                                                if (emailDomail == '') {
+                                                                if (email_domain == '') {
                                                                     result.status_code = Messages.UserGroups.RequiredMailDomain.status_code;
                                                                     result.error_code = Messages.UserGroups.RequiredMailDomain.error_code;
                                                                     result.message = Messages.UserGroups.RequiredMailDomain.message;
                                                                     result.is_success = Messages.UserGroups.RequiredMailDomain.is_success;
                                                                     res.status(200).jsonp(result);
-                                                                } else if (!Utilities.EmailDomainValidation(group.email_domain, emailDomail)) {//Validamos que coincidan los dominios
+                                                                } else if (!Utilities.EmailDomainValidation(group.email_domain, email_domain)) {//Validamos que coincidan los dominios
                                                                     result.status_code = Messages.UserGroups.DomainNamesDontMatch.status_code;
                                                                     result.error_code = Messages.UserGroups.DomainNamesDontMatch.error_code;
                                                                     result.message = Messages.UserGroups.DomainNamesDontMatch.message;
@@ -199,15 +199,15 @@ exports.addUserToPrivateGroup = function (req, res) {
                                                             }
 
                                                             if (result.is_success) {
-                                                                tUserGroup.is_validated = group.is_public;
-                                                                tUserGroup.save(function (err, userGroup) {
+                                                                t_userGroup.is_validated = group.is_public;
+                                                                t_userGroup.save(function (err, user_group) {
                                                                     if (err) {
                                                                         result.status_code = Messages.Generals.ServerError.status_code;
                                                                         result.error_code = Messages.Generals.ServerError.error_code;
                                                                         result.message = err.message;
                                                                         result.is_success = Messages.Generals.ServerError.is_success;
                                                                     } else {
-                                                                        result.userGroup = userGroup;
+                                                                        result.user_group = user_group;
                                                                     }
                                                                     res.status(200).jsonp(result);
                                                                 });
@@ -233,14 +233,14 @@ exports.addUserToPrivateGroup = function (req, res) {
                     } else {//Si tiene un código VIP y por o tanto no hay que hacer validaciones
 
                         //Validamos que el usuario no haya sido registrado anteriormente al grupo
-                        M_USERGROUP.find({ user_id: tUserGroup.host_user_id, group_id: tUserGroup.group_id }, function (err, userGroups) {
+                        M_USERGROUP.find({ user_id: t_userGroup.host_user_id, group_id: t_userGroup.group_id }, function (err, user_groups) {
                             if (err) {
                                 result.status_code = Messages.Generals.ServerError.status_code;
                                 result.error_code = Messages.Generals.ServerError.error_code;
                                 result.message = err.message;
                                 result.is_success = Messages.Generals.ServerError.is_success;
                                 res.status(200).jsonp(result);
-                            } else if (userGroups.length > 0) {
+                            } else if (user_groups.length > 0) {
                                 result.status_code = Messages.UserGroups.AlreadyExist.status_code;
                                 result.error_code = Messages.UserGroups.AlreadyExist.error_code;
                                 result.message = Messages.UserGroups.AlreadyExist.message;
@@ -248,7 +248,7 @@ exports.addUserToPrivateGroup = function (req, res) {
                                 res.status(200).jsonp(result);
                             } else {
                                 //Validamos que el pase VIP realmente exista para el grupo indicado
-                                M_GROUP.find({ vip_code: vipCode, _id: tUserGroup.group_id }, function (err, groups) {
+                                M_GROUP.find({ vip_code: vip_code, _id: t_userGroup.group_id }, function (err, groups) {
                                     if (err) {
                                         result.status_code = Messages.Generals.ServerError.status_code;
                                         result.error_code = Messages.Generals.ServerError.error_code;
@@ -263,15 +263,15 @@ exports.addUserToPrivateGroup = function (req, res) {
                                         res.status(200).jsonp(result);
                                     } else {
 
-                                        tUserGroup.is_validated = true;
-                                        tUserGroup.save(function (err, userGroup) {
+                                        t_userGroup.is_validated = true;
+                                        t_userGroup.save(function (err, user_group) {
                                             if (err) {
                                                 result.status_code = Messages.Generals.ServerError.status_code;
                                                 result.error_code = Messages.Generals.ServerError.error_code;
                                                 result.message = err.message;
                                                 result.is_success = Messages.Generals.ServerError.is_success;
                                             } else {
-                                                result.privateChannel = userGroup;
+                                                result.privateChannel = user_group;
                                             }
                                             res.status(200).jsonp(result);
                                         });
@@ -303,10 +303,10 @@ exports.addUserToPublicGroup = function (req, res) {
         error_code: Messages.Generals.Success.error_code,
         message: Messages.Generals.Success.message,
         is_success: Messages.Generals.Success.is_success,
-        userGroup: null
+        user_group: null
     };
 
-    var tUserGroup = new M_USERGROUP({
+    var t_userGroup = new M_USERGROUP({
         group_id: req.body.group_id
         , is_validated: true
     });
@@ -330,13 +330,13 @@ exports.addUserToPublicGroup = function (req, res) {
                 res.status(200).jsonp(result);
             } else {
 
-                tUserGroup.user_id = users[0]._id;
-                result = tUserGroup.ValidateModel('', '0', '0');
+                t_userGroup.user_id = users[0]._id;
+                result = t_userGroup.ValidateModel('', '0', '0');
 
                 if (result.is_success) {
 
                     //Validamos que el grupo exista
-                    M_GROUP.findById(tUserGroup.group_id, function (err, group) {
+                    M_GROUP.findById(t_userGroup.group_id, function (err, group) {
                         if (err) {
                             result.status_code = Messages.Generals.ServerError.status_code;
                             result.error_code = Messages.Generals.ServerError.error_code;
@@ -358,14 +358,14 @@ exports.addUserToPublicGroup = function (req, res) {
                         } else {
 
                             //validamos que no exista el usuario ya en el grupo, para evitar que se agregue 2 veces
-                            M_USERGROUP.find({ user_id: tUserGroup.user_id, group_id: tUserGroup.group_id }, function (err, duplicatedFriends) {
+                            M_USERGROUP.find({ user_id: t_userGroup.user_id, group_id: t_userGroup.group_id }, function (err, duplicated_friends) {
                                 if (err) {
                                     result.status_code = Messages.Generals.ServerError.status_code;
                                     result.error_code = Messages.Generals.ServerError.error_code;
                                     result.message = err.message;
                                     result.is_success = Messages.Generals.ServerError.is_success;
                                     res.status(200).jsonp(result);
-                                } else if (duplicatedFriends.length > 0) {
+                                } else if (duplicated_friends.length > 0) {
                                     result.status_code = Messages.UserGroups.AlreadyExist.status_code;
                                     result.error_code = Messages.UserGroups.AlreadyExist.error_code;
                                     result.message = Messages.UserGroups.AlreadyExist.message;
@@ -373,14 +373,14 @@ exports.addUserToPublicGroup = function (req, res) {
                                     res.status(200).jsonp(result);
                                 } else {
 
-                                    tUserGroup.save(function (err, userGroup) {
+                                    t_userGroup.save(function (err, user_group) {
                                         if (err) {
                                             result.status_code = Messages.Generals.ServerError.status_code;
                                             result.error_code = Messages.Generals.ServerError.error_code;
                                             result.message = err.message;
                                             result.is_success = Messages.Generals.ServerError.is_success;
                                         } else {
-                                            result.userGroup = userGroup;
+                                            result.user_group = user_group;
                                         }
                                         res.status(200).jsonp(result);
                                     });
@@ -414,7 +414,7 @@ exports.deleteUserGroup = function (req, res) {
         is_success: Messages.Generals.Success.is_success
     };
 
-    var tUserGroup = new M_USERGROUP({
+    var t_userGroup = new M_USERGROUP({
         group_id: req.body.group_id
     });
     
@@ -437,12 +437,12 @@ exports.deleteUserGroup = function (req, res) {
                 res.status(200).jsonp(result);
             } else {
 
-                tUserGroup.user_id = users[0]._id;
-                result = tUserGroup.ValidateModel('', '0', '0');
+                t_userGroup.user_id = users[0]._id;
+                result = t_userGroup.ValidateModel('', '0', '0');
 
                 if (result.is_success) {
 
-                    M_USERGROUP.find({ group_id: tUserGroup.group_id, user_id: tUserGroup.user_id }, function (err, items) {
+                    M_USERGROUP.find({ group_id: t_userGroup.group_id, user_id: t_userGroup.user_id }, function (err, items) {
 
                         if (err) {
                             result.status_code = Messages.Generals.ServerError.status_code;

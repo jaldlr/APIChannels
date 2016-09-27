@@ -17,7 +17,7 @@ userGroupSchema.methods.ValidateModel = function (vip_code, host_lat, host_lon) 
         error_code: Messages.Generals.Success.error_code,
         message: Messages.Generals.Success.message,
         is_success: Messages.Generals.Success.is_success,
-        userGroup: null
+        user_group: null
     };
 
     vip_code = (vip_code == null) ? '' : vip_code;

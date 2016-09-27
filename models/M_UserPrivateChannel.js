@@ -19,7 +19,7 @@ userPrivateChannelSchema.methods.ValidateModel = function (host_lat, host_lon) {
         error_code: Messages.Generals.Success.error_code,
         message: Messages.Generals.Success.message,
         is_success: Messages.Generals.Success.is_success,
-        privateChannel: null
+        private_channel: null
     };
 
     try {

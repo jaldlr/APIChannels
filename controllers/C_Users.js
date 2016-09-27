@@ -1,4 +1,4 @@
-//File: controllers/tvshows.js
+//Required Files
 var mongoose = require('mongoose');
 var M_USER = mongoose.model('CHN_User');
 var Messages = require('./../class/CL_Messages').CL_Messages;
@@ -71,7 +71,7 @@ exports.addUser = function (req, res) {
         user: null
     };
 
-    var tUser = new M_USER({
+    var t_user = new M_USER({
         name: req.body.name
         , email: req.body.email
         , gender: req.body.gender
@@ -85,10 +85,10 @@ exports.addUser = function (req, res) {
         , location_west: "0"
     });
 
-    result = tUser.ValidateModel();
+    result = t_user.ValidateModel();
 
     if (result.is_success) {
-        M_USER.find({ email: tUser.email }, function (err, users) {
+        M_USER.find({ email: t_user.email }, function (err, users) {
             if (err) {
                 result.status_code = Messages.Generals.ServerError.status_code;
                 result.error_code = Messages.Generals.ServerError.error_code;
@@ -96,7 +96,7 @@ exports.addUser = function (req, res) {
                 result.is_success = Messages.Generals.ServerError.is_success;
                 res.status(200).jsonp(result);
             } else if (users.length == 0) {
-                tUser.save(function (err, user) {
+                t_user.save(function (err, user) {
                     if (err) {
                         result.status_code = Messages.Generals.ServerError.status_code;
                         result.error_code = Messages.Generals.ServerError.error_code;

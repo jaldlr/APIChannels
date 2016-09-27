@@ -1,4 +1,4 @@
-//File: controllers/tvshows.js
+//Required Files
 var mongoose = require('mongoose');
 var M_CHANNEL = mongoose.model('CHN_Channel');
 var M_USER = mongoose.model('CHN_User');
@@ -36,13 +36,13 @@ exports.findAllChannels = function (req, res) {
                 res.status(200).jsonp(result);
             } else {
 
-                var condicion = {};
+                var condition = {};
                 if(group_id != -1){
-                    condicion = {_id: group_id}
+                    condition = { _id: group_id }
                 }
 
                 //Validamos que el grupo exista en caso de que el group_id != -1
-                M_GROUP.find(condicion, function (err, groups) {
+                M_GROUP.find(condition, function (err, groups) {
                     if (err) {
                         result.status_code = Messages.Generals.ServerError.status_code;
                         result.error_code = Messages.Generals.ServerError.error_code;
@@ -102,7 +102,7 @@ exports.addChannel = function (req, res) {
         channel: null
     };
 
-    var tchannel = new M_CHANNEL({
+    var t_channel = new M_CHANNEL({
          name: req.body.name
         , group_id: req.body.group_id
         , is_public: req.body.is_public
@@ -116,7 +116,7 @@ exports.addChannel = function (req, res) {
 
     if (req.body.fb_token !== undefined && req.body.fb_token != null && req.body.fb_token != '') {
 
-        result = tchannel.ValidateModel();
+        result = t_channel.ValidateModel();
 
         if (result.is_success) {
 
@@ -137,9 +137,9 @@ exports.addChannel = function (req, res) {
                 } else {
 
                     var user = users[0];
-                    tchannel.user_creator = user._id;
+                    t_channel.user_creator = user._id;
 
-                    M_GROUP.findById(tchannel.group_id, function (err, group) {
+                    M_GROUP.findById(t_channel.group_id, function (err, group) {
 
                         if (err) {
                             result.status_code = Messages.Generals.ServerError.status_code;
@@ -155,7 +155,7 @@ exports.addChannel = function (req, res) {
                             res.status(200).jsonp(result);
                         } else {
 
-                            M_CHANNEL.find({ name: tchannel.name }, function (err, channels) {
+                            M_CHANNEL.find({ name: t_channel.name }, function (err, channels) {
 
                                 if (err) {
                                     result.status_code = Messages.Generals.ServerError.status_code;
@@ -171,10 +171,10 @@ exports.addChannel = function (req, res) {
                                     res.status(200).jsonp(result);
                                 } else {
 
-                                    result = tchannel.ValidateFilters(user);
+                                    result = t_channel.ValidateFilters(user);
 
                                     if (result.is_success) {
-                                        tchannel.save(function (err, channel) {
+                                        t_channel.save(function (err, channel) {
                                             if (err) {
                                                 result.status_code = Messages.Generals.ServerError.status_code;
                                                 result.error_code = Messages.Generals.ServerError.error_code;
@@ -222,7 +222,7 @@ exports.updateChannel = function (req, res) {
 
         if (req.params.id !== undefined && req.params.id != null && req.params.id != '') {
 
-            var tchannel = new M_CHANNEL({
+            var t_channel = new M_CHANNEL({
                 _id: req.params.id,
                 name: req.body.name
             });
@@ -244,10 +244,10 @@ exports.updateChannel = function (req, res) {
                     res.status(200).jsonp(result);
                 } else {
 
-                    tchannel.user_creator = users[0]._id;
+                    t_channel.user_creator = users[0]._id;
 
                     //Validamos que el canal especificado exista
-                    M_CHANNEL.find({ user_creator: tchannel.user_creator, _id: tchannel._id }, function (err, channels) {
+                    M_CHANNEL.find({ user_creator: t_channel.user_creator, _id: t_channel._id }, function (err, channels) {
 
                         if (err) {
                             result.status_code = Messages.Generals.ServerError.status_code;
@@ -338,7 +338,7 @@ exports.deleteChannel= function (req, res) {
 
         if (req.body.channel_id !== undefined && req.body.channel_id != null && req.body.channel_id != '') {
 
-            var tchannel = new M_CHANNEL({
+            var t_channel = new M_CHANNEL({
                 _id: req.body.channel_id
             });
 
@@ -359,10 +359,10 @@ exports.deleteChannel= function (req, res) {
                     res.status(200).jsonp(result);
                 } else {
 
-                    tchannel.user_creator = users[0]._id;
+                    t_channel.user_creator = users[0]._id;
 
                     //Validamos que el canal especificado exista
-                    M_CHANNEL.find({ user_creator: tchannel.user_creator, _id: tchannel._id }, function (err, channels) {
+                    M_CHANNEL.find({ user_creator: t_channel.user_creator, _id: t_channel._id }, function (err, channels) {
 
                         if (err) {
                             result.status_code = Messages.Generals.ServerError.status_code;
