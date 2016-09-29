@@ -2,11 +2,21 @@
   "name": "APIRest",
   "version": "0.0.1",
   "description": "Ejemplo de API Rest",
+  "engines": {
+    "node": "4.5"
+  },
   "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "mongoose": "~3.6.11",
     "express": "^4.7.1",
     "method-override": "^2.1.2",
     "body-parser": "^1.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaldlr/APIChannels"
   }
 }
